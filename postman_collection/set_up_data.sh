@@ -4,7 +4,10 @@ case "$OSTYPE" in
     *)        python=python3 ;;
 esac
 
-cd ../yatube_api/
+SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+cd "$SCRIPT_DIR/../yatube_api" || exit 1
+
 $python manage.py migrate
 $python manage.py flush --no-input
 echo "from django.contrib.auth import get_user_model; User = get_user_model(); \

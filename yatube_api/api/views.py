@@ -1,9 +1,10 @@
 from http import HTTPStatus
 
-from posts.models import Comment, Group, Post
 from rest_framework import viewsets
 from rest_framework.response import Response
+from rest_framework.exceptions import PermissionDenied
 
+from posts.models import Comment, Group, Post
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
 
 
@@ -15,55 +16,30 @@ class PostViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user)
 
     def create(self, request, *args, **kwargs):
-        serilizer = self.get_serializer(data=request.data)
-        if serilizer.is_valid():
-            self.perform_create(serilizer)
-            return Response(serilizer.data, status=HTTPStatus.CREATED)
-        return Response(status=HTTPStatus.BAD_REQUEST)
+        try:
+            return super().create(request, *args, **kwargs)
+        except Exception:
+            return Response(
+                status=HTTPStatus.BAD_REQUEST
+            )
 
     def update(self, request, *args, **kwargs):
-
         post = self.get_object()
-
         if post.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-
-        serializer = self.get_serializer(
-            post,
-            data=request.data,
-            partial=False
-        )
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTPStatus.OK)
-
-        return Response(status=HTTPStatus.BAD_REQUEST)
+            raise PermissionDenied()
+        return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
-
         post = self.get_object()
-
         if post.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-
-        serializer = self.get_serializer(post, data=request.data, partial=True)
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTPStatus.OK)
-        else:
-            return Response(status=HTTPStatus.BAD_REQUEST)
+            raise PermissionDenied()
+        return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
-
         post = self.get_object()
-
         if post.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-        else:
-            self.perform_destroy(post)
-            return Response(status=HTTPStatus.NO_CONTENT)
+            raise PermissionDenied()
+        return super().destroy(request, *args, **kwargs)
 
 
 class GroupViewSet(viewsets.ReadOnlyModelViewSet):
@@ -75,55 +51,28 @@ class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
 
     def get_queryset(self):
-        related_post = self.kwargs.get('post')
-        comments = Comment.objects.filter(post=related_post)
-        return comments
+        post_id = self.kwargs.get('id')
+        return Comment.objects.filter(post=post_id)
 
     def perform_create(self, serializer):
-        post_id = self.kwargs.get('post')
+        post_id = self.kwargs.get('id')
         post = Post.objects.get(pk=post_id)
         serializer.save(author=self.request.user, post=post)
 
     def update(self, request, *args, **kwargs):
         comment = self.get_object()
-
         if comment.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-
-        serializer = self.get_serializer(
-            comment,
-            data=request.data,
-            partial=False
-        )
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTPStatus.OK)
-
-        return Response(serializer.errors, status=HTTPStatus.BAD_REQUEST)
+            raise PermissionDenied()
+        return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         comment = self.get_object()
-
         if comment.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-
-        serializer = self.get_serializer(
-            comment,
-            data=request.data,
-            partial=True
-        )
-
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=HTTPStatus.OK)
-        else:
-            return Response(status=HTTPStatus.BAD_REQUEST)
+            raise PermissionDenied()
+        return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         comment = self.get_object()
         if comment.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-        else:
-            self.perform_destroy(comment)
-            return Response(status=HTTPStatus.NO_CONTENT)
+            raise PermissionDenied()
+        return super().destroy(request, *args, **kwargs)

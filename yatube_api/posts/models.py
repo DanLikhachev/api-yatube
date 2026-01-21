@@ -6,9 +6,18 @@ User = get_user_model()
 
 class Group(models.Model):
     '''Модель групп.'''
-    title = models.CharField(max_length=200, verbose_name='Имя группы',)
-    slug = models.SlugField(unique=True, verbose_name='Слаг группы',)
-    description = models.TextField(verbose_name='Описание группы',)
+
+    title = models.CharField(
+        max_length=200,
+        verbose_name='Имя группы',
+    )
+    slug = models.SlugField(
+        unique=True,
+        verbose_name='Слаг группы',
+    )
+    description = models.TextField(
+        verbose_name='Описание группы',
+    )
 
     class Meta:
         verbose_name = 'Группа'
@@ -20,7 +29,10 @@ class Group(models.Model):
 
 class Post(models.Model):
     '''Модель постов.'''
-    text = models.TextField(verbose_name='Текст поста',)
+
+    text = models.TextField(
+        verbose_name='Текст поста',
+    )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
     author = models.ForeignKey(
         User,
@@ -50,11 +62,12 @@ class Post(models.Model):
 
 class Comment(models.Model):
     '''Модель комментариев.'''
+
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
         related_name='comments',
-        verbose_name='Автор комментария'
+        verbose_name='Автор комментария',
     )
     post = models.ForeignKey(
         Post,
@@ -62,7 +75,9 @@ class Comment(models.Model):
         related_name='comments',
         verbose_name='К посту:'
     )
-    text = models.TextField(verbose_name='Текст комментария',)
+    text = models.TextField(
+        verbose_name='Текст комментария',
+    )
     created = models.DateTimeField(
         'Дата добавления',
         auto_now_add=True,

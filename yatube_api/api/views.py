@@ -1,39 +1,30 @@
 from http import HTTPStatus
 
 from rest_framework import viewsets
-
 from rest_framework.response import Response
-from rest_framework import viewsets
 
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
-from posts.models import Post, Group, Comment
+from posts.models import Comment, Group, Post
 
 
 class ViewSetMixin(viewsets.ModelViewSet):
 
     def update(self, request, *args, **kwargs):
         object = self.get_object()
-
-        if object.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-
-        serializer = self.get_serializer(object, data=request.data, partial=True)
-
-        if object.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-
         serializer = self.get_serializer(
             object,
             data=request.data,
-            partial=False
+            partial=True
         )
+
+        if object.author != request.user:
+            return Response(status=HTTPStatus.FORBIDDEN)
 
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data, status=HTTPStatus.OK)
 
         return Response(status=HTTPStatus.BAD_REQUEST)
-
 
     def partial_update(self, request, *args, **kwargs):
         object = self.get_object()

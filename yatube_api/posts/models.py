@@ -87,3 +87,6 @@ class Comment(models.Model):
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
+
+    def __str__(self) -> str:
+        return f'Пост: {self.post}, комментарий: {self.text}'

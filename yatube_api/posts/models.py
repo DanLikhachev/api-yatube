@@ -5,7 +5,7 @@ User = get_user_model()
 
 
 class Group(models.Model):
-    '''Модель групп.'''
+    """Модель групп."""
 
     title = models.CharField(
         max_length=200,
@@ -28,7 +28,7 @@ class Group(models.Model):
 
 
 class Post(models.Model):
-    '''Модель постов.'''
+    """Модель постов."""
 
     text = models.TextField(
         verbose_name='Текст поста',
@@ -57,11 +57,11 @@ class Post(models.Model):
         verbose_name_plural = 'Посты'
 
     def __str__(self):
-        return self.text[::20]
+        return self.text
 
 
 class Comment(models.Model):
-    '''Модель комментариев.'''
+    """Модель комментариев."""
 
     author = models.ForeignKey(
         User,
@@ -79,9 +79,9 @@ class Comment(models.Model):
         verbose_name='Текст комментария',
     )
     created = models.DateTimeField(
-        'Дата добавления',
         auto_now_add=True,
-        db_index=True
+        db_index=True,
+        verbose_name='Дата добавления',
     )
 
     class Meta:

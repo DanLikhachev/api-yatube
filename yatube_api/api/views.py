@@ -1,7 +1,7 @@
 from http import HTTPStatus
 
-from django.shortcuts import get_object_or_404
 
+from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 
@@ -19,13 +19,12 @@ class ViewSetMixin(viewsets.ModelViewSet):
             partial=False
         )
 
-        if item.author == request.user:
-            if serializer.is_valid():
-                super().update(request, *args, **kwargs)
-                return Response(serializer.data, status=HTTPStatus.OK)
-            return Response(status=HTTPStatus.BAD_REQUEST)
-        else:
+        if item.author != request.user:
             return Response(status=HTTPStatus.FORBIDDEN)
+        if serializer.is_valid():
+            super().update(request, *args, **kwargs)
+            return Response(serializer.data, status=HTTPStatus.OK)
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
     def partial_update(self, request, *args, **kwargs):
         item = self.get_object()
@@ -35,13 +34,12 @@ class ViewSetMixin(viewsets.ModelViewSet):
             partial=True
         )
 
-        if item.author == request.user:
-            if serializer.is_valid():
-                super().partial_update(request, *args, **kwargs)
-                return Response(serializer.data, status=HTTPStatus.OK)
-            return Response(status=HTTPStatus.BAD_REQUEST)
-        else:
+        if item.author != request.user:
             return Response(status=HTTPStatus.FORBIDDEN)
+        if serializer.is_valid():
+            super().partial_update(request, *args, **kwargs)
+            return Response(serializer.data, status=HTTPStatus.OK)
+        return Response(status=HTTPStatus.BAD_REQUEST)
 
     def destroy(self, request, *args, **kwargs):
         item = self.get_object()
@@ -49,8 +47,7 @@ class ViewSetMixin(viewsets.ModelViewSet):
         if item.author == request.user:
             super().destroy(request, *args, **kwargs)
             return Response(status=HTTPStatus.NO_CONTENT)
-        else:
-            return Response(status=HTTPStatus.FORBIDDEN)
+        return Response(status=HTTPStatus.FORBIDDEN)
 
 
 class PostViewSet(ViewSetMixin):

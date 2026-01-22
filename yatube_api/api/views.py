@@ -1,12 +1,15 @@
 from http import HTTPStatus
 
-
 from django.shortcuts import get_object_or_404
 from rest_framework import viewsets
 from rest_framework.response import Response
 
 from posts.models import Comment, Group, Post
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
+
+
+class UpdateException(BaseException):
+    pass
 
 
 class ViewSetMixin(viewsets.ModelViewSet):
@@ -19,12 +22,12 @@ class ViewSetMixin(viewsets.ModelViewSet):
             partial=False
         )
 
-        if item.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-        if serializer.is_valid():
+        if item.author == request.user:
+            serializer.is_valid()
             super().update(request, *args, **kwargs)
             return Response(serializer.data, status=HTTPStatus.OK)
-        return Response(status=HTTPStatus.BAD_REQUEST)
+        return Response(status=HTTPStatus.FORBIDDEN)
+
 
     def partial_update(self, request, *args, **kwargs):
         item = self.get_object()
@@ -34,12 +37,11 @@ class ViewSetMixin(viewsets.ModelViewSet):
             partial=True
         )
 
-        if item.author != request.user:
-            return Response(status=HTTPStatus.FORBIDDEN)
-        if serializer.is_valid():
+        if item.author == request.user:
+            serializer.is_valid()
             super().partial_update(request, *args, **kwargs)
             return Response(serializer.data, status=HTTPStatus.OK)
-        return Response(status=HTTPStatus.BAD_REQUEST)
+        return Response(status=HTTPStatus.FORBIDDEN)
 
     def destroy(self, request, *args, **kwargs):
         item = self.get_object()

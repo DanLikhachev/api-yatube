@@ -28,7 +28,6 @@ class ViewSetMixin(viewsets.ModelViewSet):
             return Response(serializer.data, status=HTTPStatus.OK)
         return Response(status=HTTPStatus.FORBIDDEN)
 
-
     def partial_update(self, request, *args, **kwargs):
         item = self.get_object()
         serializer = self.get_serializer(

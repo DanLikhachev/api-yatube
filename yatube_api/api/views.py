@@ -1,15 +1,18 @@
+# Python Standard Libraries
 from http import HTTPStatus
 
+# Django core
 from django.shortcuts import get_object_or_404
+
+# Third party libraries (related or not to Django)
 from rest_framework import viewsets
 from rest_framework.response import Response
 
+# First party libraries (that is, our project’s imports)
 from posts.models import Comment, Group, Post
+
+# Local imports
 from .serializers import CommentSerializer, GroupSerializer, PostSerializer
-
-
-class UpdateException(BaseException):
-    pass
 
 
 class ViewSetMixin(viewsets.ModelViewSet):
@@ -22,11 +25,10 @@ class ViewSetMixin(viewsets.ModelViewSet):
             partial=False
         )
 
-        if item.author == request.user:
-            serializer.is_valid()
-            super().update(request, *args, **kwargs)
-            return Response(serializer.data, status=HTTPStatus.OK)
-        return Response(status=HTTPStatus.FORBIDDEN)
+        if item.author != request.user:
+            return Response(status=HTTPStatus.FORBIDDEN)
+        serializer.is_valid()
+        return super().update(request, *args, **kwargs)
 
     def partial_update(self, request, *args, **kwargs):
         item = self.get_object()
@@ -36,11 +38,10 @@ class ViewSetMixin(viewsets.ModelViewSet):
             partial=True
         )
 
-        if item.author == request.user:
-            serializer.is_valid()
-            super().partial_update(request, *args, **kwargs)
-            return Response(serializer.data, status=HTTPStatus.OK)
-        return Response(status=HTTPStatus.FORBIDDEN)
+        if item.author != request.user:
+            return Response(status=HTTPStatus.FORBIDDEN)
+        serializer.is_valid()
+        return super().partial_update(request, *args, **kwargs)
 
     def destroy(self, request, *args, **kwargs):
         item = self.get_object()
